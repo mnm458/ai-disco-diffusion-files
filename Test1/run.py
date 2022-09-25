@@ -197,3 +197,18 @@ if animation_mode == 'Video Input':
     args['frames_scale'] = args['video_init_frames_scale']
     args['frames_skip_steps'] = args['video_init_frames_skip_steps']
 
+args = SimpleNamespace(**args)
+
+print('Prepping model...')
+model, diffusion = create_model_and_diffusion(**model_config)
+if diffusion_model == 'custom':
+    model.load_state_dict(torch.load(custom_path, map_location='cpu'))
+else:
+    model.load_state_dict(torch.load(f'{model_path}/{get_model_filename(diffusion_model)}', map_location='cpu'))
+model.requires_grad_(False).eval().to(device)
+for name, param in model.named_parameters():
+    if 'qkv' in name or 'norm' in name or 'proj' in name:
+        param.requires_grad_()
+if model_config['use_fp16']:
+    model.convert_to_fp16()
+
