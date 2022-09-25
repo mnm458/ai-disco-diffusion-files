@@ -212,3 +212,13 @@ for name, param in model.named_parameters():
 if model_config['use_fp16']:
     model.convert_to_fp16()
 
+gc.collect()
+torch.cuda.empty_cache()
+try:
+    do_run()
+except KeyboardInterrupt:
+    pass
+finally:
+    print('Seed used:', seed)
+    gc.collect()
+    torch.cuda.empty_cache()
